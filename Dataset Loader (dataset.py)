@@ -1,0 +1,48 @@
+import os
+import json
+import torch
+from PIL import Image
+from torch.utils.data import Dataset
+from utils.preprocessing import get_transforms
+
+
+class FrameDataset(Dataset):
+
+    def __init__(self, frame_dir, label_file):
+
+        self.frame_dir = frame_dir
+        self.transform = get_transforms()
+
+        with open(label_file) as f:
+            self.labels = json.load(f)
+
+        self.videos = list(self.labels.keys())
+
+
+    def __len__(self):
+
+        return len(self.videos)
+
+
+    def __getitem__(self, idx):
+
+        video = self.videos[idx]
+        frames_path = os.path.join(self.frame_dir, video)
+
+        frames = sorted(os.listdir(frames_path))
+
+        images = []
+
+        for f in frames:
+
+            img = Image.open(os.path.join(frames_path,f))
+
+            img = self.transform(img)
+
+            images.append(img)
+
+        images = torch.stack(images)
+
+        label = torch.tensor(self.labels[video])
+
+        return images, label
