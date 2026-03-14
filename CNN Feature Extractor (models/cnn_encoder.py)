@@ -1,0 +1,33 @@
+import torch
+import torch.nn as nn
+import torchvision.models as models
+
+
+class CNNEncoder(nn.Module):
+
+    def __init__(self):
+
+        super().__init__()
+
+        base_model = models.resnet50(pretrained=True)
+
+        self.feature_extractor = nn.Sequential(*list(base_model.children())[:-1])
+
+        self.fc = nn.Linear(2048,512)
+
+
+    def forward(self,x):
+
+        B,T,C,H,W = x.shape
+
+        x = x.view(B*T,C,H,W)
+
+        features = self.feature_extractor(x)
+
+        features = features.view(B*T,2048)
+
+        features = self.fc(features)
+
+        features = features.view(B,T,512)
+
+        return features
