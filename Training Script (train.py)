@@ -1,0 +1,44 @@
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+
+from utils.dataset import FrameDataset
+from models.cnn_encoder import CNNEncoder
+from models.temporal_model import TemporalModel
+
+
+dataset = FrameDataset("frames","data/train_labels.json")
+
+loader = DataLoader(dataset,batch_size=2,shuffle=True)
+
+
+cnn = CNNEncoder()
+
+temporal = TemporalModel()
+
+
+optimizer = torch.optim.Adam(
+    list(cnn.parameters())+list(temporal.parameters()),
+    lr=1e-4
+)
+
+loss_fn = nn.MSELoss()
+
+
+for epoch in range(10):
+
+    for images,labels in loader:
+
+        features = cnn(images)
+
+        scores = temporal(features)
+
+        loss = loss_fn(scores,labels.float())
+
+        optimizer.zero_grad()
+
+        loss.backward()
+
+        optimizer.step()
+
+    print("Epoch:",epoch,"Loss:",loss.item())
