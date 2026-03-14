@@ -1,0 +1,11 @@
+import torch
+
+def predict_order(model,frames):
+
+    features = model.cnn(frames)
+
+    scores = model.temporal(features)
+
+    order = torch.argsort(scores)
+
+    return order
