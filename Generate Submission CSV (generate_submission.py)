@@ -1,0 +1,15 @@
+import csv
+
+def write_submission(results):
+
+    with open("submission.csv","w") as f:
+
+        writer = csv.writer(f)
+
+        writer.writerow(["video_id","order"])
+
+        for video,order in results.items():
+
+            order_str = " ".join(map(str,order))
+
+            writer.writerow([video,order_str])
